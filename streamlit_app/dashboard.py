@@ -254,7 +254,10 @@ if analyze_btn and user_comment:
         resp = requests.post(f"{API_URL}/detect_toxicity", json={"text": user_comment})
         if resp.status_code == 200:
             result = resp.json()
-            score = result["score"]
+            score = result.get("score")
+            if score is None:
+                st.error(result.get("error", "No score returned from backend."))
+                st.stop()
             if result["toxic"]:
                 st.markdown(
                     f"<div class='result-card toxic'><span class='result-title toxic'>🚨 Toxic!</span> (score: <b>{score:.2f}</b>)</div>",

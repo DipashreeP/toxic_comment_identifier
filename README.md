@@ -25,9 +25,9 @@ toxic_comment_app/
 
 ### Local Development
 1. Clone the repo
-2. Build and run with Docker Compose:
+2. Build and run :
    ```bash
-   docker-compose up --build
+   ./run_all_local.sh
    ```
 3. Access the dashboard at http://localhost:8501
 
