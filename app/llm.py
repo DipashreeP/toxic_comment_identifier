@@ -26,6 +26,16 @@ def get_t5_pipeline():
             _model_cache['t5'] = hf_pipeline('text2text-generation', model=model, tokenizer=tokenizer, max_length=128)
         return _model_cache['t5']
 
+def get_flan_t5_small_pipeline():
+    with _model_lock:
+        if 'flan-t5-small' not in _model_cache:
+            model_name = 'google/flan-t5-small'
+            tokenizer = AutoTokenizer.from_pretrained(model_name)
+            model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+            _model_cache['flan-t5-small'] = hf_pipeline('text2text-generation', model=model, tokenizer=tokenizer, max_length=128)
+        return _model_cache['flan-t5-small']
+
+
 def detect_toxicity(text, model_name):
     pipe = get_toxicity_pipeline()
     result = pipe(text)
@@ -49,8 +59,8 @@ def detect_toxicity(text, model_name):
         toxic = label == 'toxic'
     return {"toxic": toxic, "score": score}
 
-def rewrite_text(text, model_name):
-    t5_pipe = get_t5_pipeline()
+def rewrite_text(text, model_name=None):
+    t5_pipe = get_flan_t5_small_pipeline()
     prompt = (
         "You are an assistant that rewrites software/code-related comments to be neutral, professional, and respectful. "
         "Remove any insults, offensive language, or toxicity, but keep all technical meaning and intent. "
@@ -63,6 +73,10 @@ def rewrite_text(text, model_name):
         "Example 2:\n"
         "Original: You must be the dumbest person to think this library is useful. Just quit coding forever.\n"
         "Rewritten: I don't find this library useful for my needs. Perhaps consider a different approach.\n"
+        "\n"
+        "Example 3:\n"
+        "Original: This is the worst implementation I've ever seen. Did you even test it?\n"
+        "Rewritten: This implementation could be improved. Have you considered testing it further?\n"
         "\n"
         f"Original: {text}\nRewritten:"
     )
@@ -80,7 +94,10 @@ def rewrite_text(text, model_name):
     # Remove any leading 'Rewritten:' or similar
     if rewritten.lower().startswith('rewritten:'):
         rewritten = rewritten[len('rewritten:'):].strip()
-    # Fallback: If rewritten is empty or too short, use the original
+    # Remove the original comment if present in the output
+    if text in rewritten:
+        rewritten = rewritten.replace(text, '').strip()
+    # Fallback: If rewritten is empty or too short, use the fallback message
     if not rewritten or len(rewritten.split()) < 3:
-        rewritten = text
+        rewritten = "The original comment was too toxic to rephrase. Please consider rewording it."
     return rewritten 

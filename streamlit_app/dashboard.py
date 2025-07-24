@@ -198,13 +198,13 @@ st.markdown(
     """
     <div class='header-logo'>
         <img src='https://cdn-icons-png.flaticon.com/512/5968/5968705.png' alt='Python logo'>
-        <h2 style='color:#3b3b3b; margin:0; font-weight:700;'>Dipashree's Tech Feed</h2>
+        <h2 style='color:#3b3b3b; margin:0; font-weight:700;'>My Tech Feed</h2>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-# --- Tech Illustration as Text ---
+# --- Tech Illustration as Text ---b
 st.markdown(
     """
     <div class='tech-illustration-text'>Tech Illustration</div>
